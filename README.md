@@ -35,9 +35,11 @@ This project presents the construction and evolution of Stonehenge through five 
 - **WebXR** - VR headset support
 - **HTML5/CSS3** - Structure and styling
 - **JavaScript (ES6)** - Interactive functionality
+- **Python** - OBJ model generation script
 - **GitHub Pages** - Hosting
 
 ## 📁 Project Structure
+
 ```
 
 Stonehenge_evolution/
