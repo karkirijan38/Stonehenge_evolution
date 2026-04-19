@@ -3,7 +3,6 @@ let voiceEnabled = true;
 let currentPhase = 0;
 let selectedVoice = null;
 
-// CHECK IF ON HOMEPAGE
 function isHomePage() {
     const path = window.location.pathname;
     return path === '/' || path === '' || path.includes('index.html') || path.endsWith('/');
@@ -32,12 +31,26 @@ function getBestVoice() {
     });
 }
 
+// STOP ALL VOICE - call this before navigation
+export function killVoice() {
+    window.speechSynthesis.cancel();
+    voiceEnabled = false;
+}
+
+// Restart voice (called when entering a phase page)
+export function reviveVoice() {
+    voiceEnabled = true;
+}
+
 export function initVoiceover() {
-    // DON'T INITIALIZE ON HOMEPAGE
     if (isHomePage()) {
         console.log('Voiceover disabled on homepage');
         return;
     }
+    
+    // Kill any existing voice when entering phase page
+    window.speechSynthesis.cancel();
+    voiceEnabled = true;
     
     window.speechSynthesis.getVoices();
     if (window.speechSynthesis.onvoiceschanged) {
@@ -90,7 +103,6 @@ export function initVoiceover() {
 }
 
 export function speakPhase(phaseIndex) {
-    // DON'T SPEAK ON HOMEPAGE
     if (isHomePage()) return;
     if (!voiceEnabled) return;
     
@@ -102,14 +114,24 @@ export function speakPhase(phaseIndex) {
     
     if (selectedVoice) {
         utterance.voice = selectedVoice;
+        window.speechSynthesis.speak(utterance);
     } else {
         getBestVoice().then(voice => {
             utterance.voice = voice;
             window.speechSynthesis.speak(utterance);
         });
-        return;
     }
-    window.speechSynthesis.speak(utterance);
+}
+
+export function updateCurrentPhase(phaseIndex) {
+    if (isHomePage()) return;
+    currentPhase = phaseIndex;
+    speakPhase(phaseIndex);
+}
+
+export function stopVoiceover() {
+    window.speechSynthesis.cancel();
+}    window.speechSynthesis.speak(utterance);
 }
 
 export function updateCurrentPhase(phaseIndex) {
