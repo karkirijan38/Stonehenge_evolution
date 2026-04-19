@@ -2,6 +2,7 @@
 let voiceEnabled = true;
 let currentPhase = 0;
 let selectedVoice = null;
+let isInitialized = false;
 
 function isHomePage() {
     const path = window.location.pathname;
@@ -9,11 +10,11 @@ function isHomePage() {
 }
 
 const phaseVoiceTexts = {
-    0: `Phase 1. Origins. 3000 BCE. Long before the stones, Stonehenge began as a simple circular ditch and bank.`,
-    1: `Phase 2. First Stones. 2500 BCE. The first stones arrived at Stonehenge. These were the bluestones from Wales.`,
-    2: `Phase 3. Great Monument. 2200 BCE. Massive sarsen stones with trilithons. The iconic Stonehenge we recognize today.`,
-    3: `Phase 4. Modifications. 1500 BCE. Reorganization of stones and construction of the Avenue.`,
-    4: `Phase 5. Present Day. UNESCO World Heritage site. Millions of visitors each year.`
+    0: "Phase 1. Origins. 3000 BCE. Circular ditch and bank. Wooden posts. No stones yet.",
+    1: "Phase 2. First Stones. 2500 BCE. Small bluestones arrive from Wales. First stone circle.",
+    2: "Phase 3. Great Monument. 2200 BCE. Massive sarsen stones with trilithons. Iconic Stonehenge.",
+    3: "Phase 4. Modifications. 1500 BCE. Reorganization of stones and Avenue construction.",
+    4: "Phase 5. Present Day. UNESCO World Heritage site. Millions of visitors annually."
 };
 
 function getBestVoice() {
@@ -31,26 +32,16 @@ function getBestVoice() {
     });
 }
 
-// STOP ALL VOICE - call this before navigation
-export function killVoice() {
-    window.speechSynthesis.cancel();
-    voiceEnabled = false;
-}
-
-// Restart voice (called when entering a phase page)
-export function reviveVoice() {
-    voiceEnabled = true;
-}
-
 export function initVoiceover() {
     if (isHomePage()) {
-        console.log('Voiceover disabled on homepage');
+        console.log('Homepage - voiceover disabled');
         return;
     }
     
-    // Kill any existing voice when entering phase page
-    window.speechSynthesis.cancel();
-    voiceEnabled = true;
+    if (isInitialized) return;
+    isInitialized = true;
+    
+    console.log('Phase page - initializing voiceover');
     
     window.speechSynthesis.getVoices();
     if (window.speechSynthesis.onvoiceschanged) {
@@ -59,9 +50,11 @@ export function initVoiceover() {
         getBestVoice().then(v => selectedVoice = v);
     }
     
+    // Remove existing button
     const existingBtn = document.getElementById('speakerBtn');
     if (existingBtn) existingBtn.remove();
     
+    // Create container
     let container = document.querySelector('.voice-button-container');
     if (!container) {
         container = document.createElement('div');
@@ -114,13 +107,14 @@ export function speakPhase(phaseIndex) {
     
     if (selectedVoice) {
         utterance.voice = selectedVoice;
-        window.speechSynthesis.speak(utterance);
     } else {
         getBestVoice().then(voice => {
             utterance.voice = voice;
             window.speechSynthesis.speak(utterance);
         });
+        return;
     }
+    window.speechSynthesis.speak(utterance);
 }
 
 export function updateCurrentPhase(phaseIndex) {
@@ -129,17 +123,11 @@ export function updateCurrentPhase(phaseIndex) {
     speakPhase(phaseIndex);
 }
 
-export function stopVoiceover() {
+export function killVoice() {
     window.speechSynthesis.cancel();
-}    window.speechSynthesis.speak(utterance);
+    voiceEnabled = false;
 }
 
-export function updateCurrentPhase(phaseIndex) {
-    if (isHomePage()) return;
-    currentPhase = phaseIndex;
-    speakPhase(phaseIndex);
-}
-
-export function stopVoiceover() {
-    window.speechSynthesis.cancel();
+export function reviveVoice() {
+    voiceEnabled = true;
 }
