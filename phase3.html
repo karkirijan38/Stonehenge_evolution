@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stonehenge - Phase 3: Great Monument (2200 BCE)</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="viewer-body">
+    <div id="viewer" class="viewer-container"></div>
+    
+    <div class="info-panel">
+        <div class="phase-badge">🗿 PHASE 3</div>
+        <h1>Great Monument (2200 BCE)</h1>
+        <p>Massive sarsen stones with trilithons — the iconic Stonehenge we recognize today. The final and most impressive phase.</p>
+    </div>
+    
+    <div class="nav-buttons">
+        <a href="phase2.html" class="nav-btn">← Previous: First Stones</a>
+        <a href="index.html" class="nav-btn">All Phases</a>
+        <a href="phase4.html" class="nav-btn">Next: Modifications →</a>
+    </div>
+    
+    <div class="instructions">
+        <span>🖱️ Drag to rotate</span>
+        <span>📌 Scroll to zoom</span>
+    </div>
+    
+    <div id="loading" class="loading">📦 Loading 3D scene...</div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="js/sound.js"></script>
+    <script type="module">
+        import { initViewer } from './js/viewer.js';
+        
+        initViewer('viewer', {
+    name: 'phase3_sarsen',
+    phaseIndex: 2,
+    showBluestones: true,
+    showSarsen: true,
+    showFallen: false,
+    showAvenue: false,
+    cameraX: 11, cameraY: 8, cameraZ: 16
+});
+    </script>
+</body>
+</html>

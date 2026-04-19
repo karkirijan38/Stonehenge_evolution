@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stonehenge - Phase 1: Origins (3000 BCE)</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Additional realistic styling */
+        body { overflow: hidden; }
+        .info-panel {
+            background: rgba(10,15,26,0.85);
+            backdrop-filter: blur(12px);
+            border-left: 4px solid #d4a017;
+        }
+    </style>
+</head>
+<body class="viewer-body">
+    <div id="viewer" class="viewer-container"></div>
+    
+    <div class="info-panel">
+        <div class="phase-badge">🏛️ PHASE 1</div>
+        <h1>Origins (3000 BCE)</h1>
+        <p>Circular ditch and bank — wooden posts, no stones yet. The first ceremonial gathering place marked by earthworks and timber structures.</p>
+    </div>
+    
+    <div class="nav-buttons">
+        <a href="index.html" class="nav-btn">← All Phases</a>
+        <a href="phase2.html" class="nav-btn">Next: First Stones →</a>
+    </div>
+    
+    <div class="instructions">
+        <span>🖱️ Drag to rotate camera</span>
+        <span>📌 Scroll to zoom in/out</span>
+    </div>
+    
+    <div id="loading" class="loading">🏗️ Building realistic 3D scene...</div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.128.0/examples/jsm/"
+            }
+        }
+    </script>
+    <script type="module" src="js/sound.js"></script>
+    <script type="module" src="js/viewer.js"></script>
+    <script type="module">
+        import { initViewer } from './js/viewer.js';
+        
+       initViewer('viewer', {
+    name: 'phase1_origins',
+    phaseIndex: 0,
+    showBluestones: false,
+    showSarsen: false,
+    showFallen: false,
+    showAvenue: false,
+    cameraX: 13, cameraY: 8, cameraZ: 18
+});
+    </script>
+</body>
+</html>
