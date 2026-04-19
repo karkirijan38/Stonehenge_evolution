@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Additional realistic styling */
         body { overflow: hidden; }
         .info-panel {
             background: rgba(10,15,26,0.85);
@@ -50,15 +49,27 @@
     <script type="module">
         import { initViewer } from './js/viewer.js';
         
-       initViewer('viewer', {
-    name: 'phase1_origins',
-    phaseIndex: 0,
-    showBluestones: false,
-    showSarsen: false,
-    showFallen: false,
-    showAvenue: false,
-    cameraX: 13, cameraY: 8, cameraZ: 18
-});
+        initViewer('viewer', {
+            name: 'phase1_origins',
+            phaseIndex: 0,
+            showBluestones: false,
+            showSarsen: false,
+            showFallen: false,
+            showAvenue: false,
+            cameraX: 13, cameraY: 8, cameraZ: 18
+        });
+    </script>
+    
+    <script type="module">
+        import { initVoiceover, updateCurrentPhase, killVoice } from './js/sound.js';
+        
+        initVoiceover();
+        updateCurrentPhase(0);
+        
+        window.addEventListener('beforeunload', () => killVoice());
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => killVoice());
+        });
     </script>
 </body>
 </html>
