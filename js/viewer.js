@@ -3,7 +3,6 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { createRealisticMaterials, createAtmosphere } from './textures.js';
-import { initVoiceover, updateCurrentPhase } from './sound.js';
 
 export function initViewer(containerId, phaseConfig) {
     const container = document.getElementById(containerId);
@@ -47,7 +46,7 @@ export function initViewer(containerId, phaseConfig) {
     vrBtn.style.justifyContent = 'center';
     document.body.appendChild(vrBtn);
     
-    // ===== BUTTON CONTAINER (Top Right for Voice + Fullscreen) =====
+    // ===== BUTTON CONTAINER (Top Right for Fullscreen) =====
     const rightButtonContainer = document.createElement('div');
     rightButtonContainer.style.position = 'absolute';
     rightButtonContainer.style.top = '20px';
@@ -87,68 +86,6 @@ export function initViewer(containerId, phaseConfig) {
     };
     rightButtonContainer.appendChild(fullscreenBtn);
     
-    // ===== VOICE BUTTON (added to same container) =====
-    const voiceBtn = document.createElement('button');
-    voiceBtn.id = 'voiceBtn';
-    voiceBtn.innerHTML = '🔊 Voice';
-    voiceBtn.style.padding = '6px 12px';
-    voiceBtn.style.fontSize = '11px';
-    voiceBtn.style.fontWeight = 'bold';
-    voiceBtn.style.cursor = 'pointer';
-    voiceBtn.style.background = '#4a6a3a';
-    voiceBtn.style.color = 'white';
-    voiceBtn.style.border = 'none';
-    voiceBtn.style.borderRadius = '20px';
-    voiceBtn.style.height = '28px';
-    voiceBtn.style.display = 'inline-flex';
-    voiceBtn.style.alignItems = 'center';
-    voiceBtn.style.justifyContent = 'center';
-    voiceBtn.style.gap = '4px';
-    rightButtonContainer.appendChild(voiceBtn);
-    
-    // Voice state
-    let voiceEnabled = true;
-    
-    const phaseVoiceTexts = {
-        0: "Phase 1. Origins. 3000 BCE. Circular ditch and bank. Wooden posts. No stones yet. The first ceremonial gathering place.",
-        1: "Phase 2. First Stones. 2500 BCE. Small bluestones arrive from Wales. First stone circle. About eighty bluestones arranged in an incomplete circle.",
-        2: "Phase 3. Great Monument. 2200 BCE. Massive sarsen stones with trilithons. The iconic Stonehenge we recognize today.",
-        3: "Phase 4. Modifications. 1500 BCE. Reorganization of stones and construction of the Avenue. A processional path to the River Avon.",
-        4: "Phase 5. Present Day. UNESCO World Heritage site. Fallen stones restored. Conservation ongoing. Millions of visitors annually."
-    };
-    
-    function speakPhase(phaseIndex) {
-        // CHECK IF ON HOMEPAGE - DON'T SPEAK
-        const isHomePage = window.location.pathname.includes('index.html') || 
-                           window.location.pathname === '/' || 
-                           window.location.pathname.endsWith('/');
-        
-        if (!voiceEnabled) return;
-        if (isHomePage) return;  // NO VOICE ON HOMEPAGE
-        
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(phaseVoiceTexts[phaseIndex]);
-        utterance.rate = 0.9;
-        window.speechSynthesis.speak(utterance);
-    }
-    
-    voiceBtn.onclick = () => {
-        voiceEnabled = !voiceEnabled;
-        if (voiceEnabled) {
-            voiceBtn.innerHTML = '🔊 Voice';
-            voiceBtn.style.background = '#4a6a3a';
-            if (phaseConfig.phaseIndex !== undefined) speakPhase(phaseConfig.phaseIndex);
-        } else {
-            voiceBtn.innerHTML = '🔇 Mute';
-            voiceBtn.style.background = '#aa3333';
-            window.speechSynthesis.cancel();
-        }
-    };
-    
-    // Speak on load
-    if (phaseConfig.phaseIndex !== undefined) {
-        setTimeout(() => speakPhase(phaseConfig.phaseIndex), 500);
-    }
     // Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
