@@ -41,14 +41,26 @@
         import { initViewer } from './js/viewer.js';
         
         initViewer('viewer', {
-    name: 'phase5_present',
-    phaseIndex: 4,
-    showBluestones: true,
-    showSarsen: true,
-    showFallen: true,
-    showAvenue: true,
-    cameraX: 11, cameraY: 8, cameraZ: 16
-});
+            name: 'phase5_present',
+            phaseIndex: 4,
+            showBluestones: true,
+            showSarsen: true,
+            showFallen: true,
+            showAvenue: true,
+            cameraX: 11, cameraY: 8, cameraZ: 16
+        });
+    </script>
+    
+    <script type="module">
+        import { initVoiceover, updateCurrentPhase, killVoice } from './js/sound.js';
+        
+        initVoiceover();
+        updateCurrentPhase(4);
+        
+        window.addEventListener('beforeunload', () => killVoice());
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => killVoice());
+        });
     </script>
 </body>
 </html>
