@@ -42,14 +42,26 @@
         import { initViewer } from './js/viewer.js';
         
         initViewer('viewer', {
-    name: 'phase3_sarsen',
-    phaseIndex: 2,
-    showBluestones: true,
-    showSarsen: true,
-    showFallen: false,
-    showAvenue: false,
-    cameraX: 11, cameraY: 8, cameraZ: 16
-});
+            name: 'phase3_sarsen',
+            phaseIndex: 2,
+            showBluestones: true,
+            showSarsen: true,
+            showFallen: false,
+            showAvenue: false,
+            cameraX: 11, cameraY: 8, cameraZ: 16
+        });
+    </script>
+    
+    <script type="module">
+        import { initVoiceover, updateCurrentPhase, killVoice } from './js/sound.js';
+        
+        initVoiceover();
+        updateCurrentPhase(2);
+        
+        window.addEventListener('beforeunload', () => killVoice());
+        document.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => killVoice());
+        });
     </script>
 </body>
 </html>
