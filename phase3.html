@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stonehenge - Phase 3: Great Monument (2200 BCE)</title>
+    <title>Stonehenge - Phase 3: Great Monument</title>
     <link rel="stylesheet" href="css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body class="viewer-body">
+<body>
     <div id="viewer" class="viewer-container"></div>
     
     <div class="info-panel">
@@ -17,9 +16,9 @@
     </div>
     
     <div class="nav-buttons">
-        <a href="phase2.html" class="nav-btn">← Previous: First Stones</a>
+        <a href="phase2.html" class="nav-btn">← Previous</a>
         <a href="index.html" class="nav-btn">All Phases</a>
-        <a href="phase4.html" class="nav-btn">Next: Modifications →</a>
+        <a href="phase4.html" class="nav-btn">Next →</a>
     </div>
     
     <div class="instructions">
@@ -37,13 +36,12 @@
             }
         }
     </script>
-    <script type="module" src="js/sound.js"></script>
     <script type="module">
         import { initViewer } from './js/viewer.js';
         
         initViewer('viewer', {
             phaseIndex: 2,
-            cameraX: 12, cameraY: 8, cameraZ: 16
+            cameraX: 8, cameraY: 6, cameraZ: 12
         });
     </script>
 </body>
