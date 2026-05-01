@@ -5,13 +5,16 @@ import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // ===== LOCAL GITHUB GLB LINKS =====
+// ===== DIRECT GITHUB PAGES LINKS =====
 const phaseFiles = {
-    0: 'Phase1.glb',
-    1: 'Phase2.glb',
-    2: 'Phase3.glb',
-    3: 'Phase4.glb',
-    4: 'Phase5.glb'
+    0: 'https://karkirijan38.github.io/Stonehenge-evolution/Phase1.glb',
+    1: 'https://karkirijan38.github.io/Stonehenge-evolution/Phase2.glb',
+    2: 'https://karkirijan38.github.io/Stonehenge-evolution/Phase3.glb',
+    3: 'https://karkirijan38.github.io/Stonehenge-evolution/Phase4.glb',
+    4: 'https://karkirijan38.github.io/Stonehenge-evolution/Phase5.glb'
 };
+
+
 
 let currentModel = null;
 let scene, camera, renderer, controls;
