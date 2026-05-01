@@ -42,25 +42,8 @@
         import { initViewer } from './js/viewer.js';
         
         initViewer('viewer', {
-            name: 'phase4_modifications',
             phaseIndex: 3,
-            showBluestones: true,
-            showSarsen: true,
-            showFallen: false,
-            showAvenue: true,
-            cameraX: 11, cameraY: 8, cameraZ: 16
-        });
-    </script>
-    
-    <script type="module">
-        import { initVoiceover, updateCurrentPhase, killVoice } from './js/sound.js';
-        
-        initVoiceover();
-        updateCurrentPhase(3);
-        
-        window.addEventListener('beforeunload', () => killVoice());
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => killVoice());
+            cameraX: 12, cameraY: 8, cameraZ: 16
         });
     </script>
 </body>
