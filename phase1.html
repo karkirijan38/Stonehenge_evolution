@@ -8,11 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { overflow: hidden; }
-        .info-panel {
-            background: rgba(10,15,26,0.85);
-            backdrop-filter: blur(12px);
-            border-left: 4px solid #d4a017;
-        }
     </style>
 </head>
 <body class="viewer-body">
@@ -30,11 +25,11 @@
     </div>
     
     <div class="instructions">
-        <span>🖱️ Drag to rotate camera</span>
-        <span>📌 Scroll to zoom in/out</span>
+        <span>🖱️ Drag to rotate</span>
+        <span>📌 Scroll to zoom</span>
     </div>
     
-    <div id="loading" class="loading">🏗️ Building realistic 3D scene...</div>
+    <div id="loading" class="loading">📦 Loading 3D scene...</div>
 
     <script type="importmap">
         {
@@ -45,30 +40,12 @@
         }
     </script>
     <script type="module" src="js/sound.js"></script>
-    <script type="module" src="js/viewer.js"></script>
     <script type="module">
         import { initViewer } from './js/viewer.js';
         
         initViewer('viewer', {
-            name: 'phase1_origins',
             phaseIndex: 0,
-            showBluestones: false,
-            showSarsen: false,
-            showFallen: false,
-            showAvenue: false,
-            cameraX: 13, cameraY: 8, cameraZ: 18
-        });
-    </script>
-    
-    <script type="module">
-        import { initVoiceover, updateCurrentPhase, killVoice } from './js/sound.js';
-        
-        initVoiceover();
-        updateCurrentPhase(0);
-        
-        window.addEventListener('beforeunload', () => killVoice());
-        document.querySelectorAll('a').forEach(link => {
-            link.addEventListener('click', () => killVoice());
+            cameraX: 12, cameraY: 8, cameraZ: 16
         });
     </script>
 </body>
