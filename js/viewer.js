@@ -17,11 +17,11 @@ export function initViewer(containerId, config) {
 
     // 1. Scene & Background (Muted English Sky)
     const scene = new THREE.Scene();
-    const skyColor = 0x9BB0B5; // Muted grayish-blue
+    const skyColor = 0x9BB0B5; 
     scene.background = new THREE.Color(skyColor); 
 
-    // 2. Distance Fog (Hides the edges of the 3D world)
-    scene.fog = new THREE.Fog(skyColor, 20, 100);
+    // 2. Distance Fog
+    scene.fog = new THREE.Fog(skyColor, 20, 150); // Pushed fog back slightly so it doesn't crop the model
 
     // 3. Camera & Renderer
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
@@ -36,10 +36,10 @@ export function initViewer(containerId, config) {
     sunLight.position.set(50, 80, 40);
     scene.add(sunLight);
 
-    // 5. Procedural Grass Floor (Color matched to your earthy models)
+    // 5. Procedural Grass Floor 
     const floorGeometry = new THREE.PlaneGeometry(300, 300);
     const floorMaterial = new THREE.MeshStandardMaterial({ 
-        color: 0x7c855e, // Muted, realistic olive-green
+        color: 0x7c855e, 
         roughness: 0.95,
         metalness: 0.05
     });
@@ -47,49 +47,46 @@ export function initViewer(containerId, config) {
     floor.rotation.x = -Math.PI / 2;
     scene.add(floor);
 
-    // 6. 🌫️ KING'S MOVING FOG SYSTEM
-    // We generate a soft, puffy cloud texture using a canvas
+    // 6. 🌫️ MOVING FOG SYSTEM
     const fogCanvas = document.createElement('canvas');
     fogCanvas.width = 256;
     fogCanvas.height = 256;
     const fogContext = fogCanvas.getContext('2d');
     const fogGradient = fogContext.createRadialGradient(128, 128, 0, 128, 128, 128);
-    fogGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)'); // Center opacity
-    fogGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');   // Fades to invisible
+    fogGradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)'); 
+    fogGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');   
     fogContext.fillStyle = fogGradient;
     fogContext.fillRect(0, 0, 256, 256);
     const fogTexture = new THREE.CanvasTexture(fogCanvas);
 
-    // Create a swarm of fog clouds
     const fogGeometry = new THREE.BufferGeometry();
-    const fogCount = 60; // Enough clouds to look thick, but keeps phone fast
+    const fogCount = 60; 
     const fogPositions = new Float32Array(fogCount * 3);
     for(let i = 0; i < fogCount; i++) {
-        fogPositions[i*3] = (Math.random() - 0.5) * 120;     // X spread
-        fogPositions[i*3+1] = Math.random() * 8 + 1;         // Y (Keeps fog close to the ground)
-        fogPositions[i*3+2] = (Math.random() - 0.5) * 120;     // Z spread
+        fogPositions[i*3] = (Math.random() - 0.5) * 120;     
+        fogPositions[i*3+1] = Math.random() * 8 + 1;         
+        fogPositions[i*3+2] = (Math.random() - 0.5) * 120;     
     }
     fogGeometry.setAttribute('position', new THREE.BufferAttribute(fogPositions, 3));
     
     const fogMaterial = new THREE.PointsMaterial({
-        size: 40, // Massive soft clouds
+        size: 40, 
         map: fogTexture,
         transparent: true,
         opacity: 0.6,
-        depthWrite: false, // Stops clouds from cutting into each other
+        depthWrite: false, 
         blending: THREE.NormalBlending,
-        color: 0xcad6d9 // Very light greyish-blue mist
+        color: 0xcad6d9 
     });
     
     const movingFog = new THREE.Points(fogGeometry, fogMaterial);
     scene.add(movingFog);
-    // ------------------------------------
 
     // 7. Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.maxPolarAngle = Math.PI / 2 - 0.02; // Stop camera from going underground
+    controls.maxPolarAngle = Math.PI / 2 - 0.02; 
 
     // 8. Load the 3D Model
     const loader = new GLTFLoader();
@@ -101,14 +98,18 @@ export function initViewer(containerId, config) {
             (gltf) => {
                 const model = gltf.scene;
 
-                // --- TILT FIXER (For Phases 4 & 5) ---
-                if (config.phaseIndex === 3 || config.phaseIndex === 4) {
-                    model.rotation.z = 25 * (Math.PI / 180); // Adjust this number if it's still tilted!
+                // --- 👑 UPGRADED TILT FIXER ---
+                // Now Phase 4 and Phase 5 have their own separate tilt controls!
+                if (config.phaseIndex === 3) {
+                    model.rotation.z = 25 * (Math.PI / 180); // Phase 4 tilt
+                } else if (config.phaseIndex === 4) {
+                    model.rotation.z = 0 * (Math.PI / 180); // Phase 5 tilt (Set to 0 so the new model is flat)
+                    // If Phase 5 tilts the OTHER way, try 25 or -25 here!
                 }
 
                 scene.add(model);
 
-                // --- MAGIC AUTO-FRAME ---
+                // --- 👑 UPGRADED AUTO-FRAME (Anti-Crop) ---
                 const box = new THREE.Box3().setFromObject(model);
                 const center = box.getCenter(new THREE.Vector3());
                 const size = box.getSize(new THREE.Vector3());
@@ -117,9 +118,12 @@ export function initViewer(containerId, config) {
 
                 const maxDim = Math.max(size.x, size.y, size.z);
                 const fov = camera.fov * (Math.PI / 180);
-                let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2)) * 1.5; 
+                
+                // Bumped multiplier from 1.5 to 2.2 to pull the camera further back!
+                let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2)) * 2.2; 
 
-                camera.position.set(center.x, center.y + (maxDim / 4), center.z + cameraZ);
+                // Bumped the Y multiplier to look slightly more downward
+                camera.position.set(center.x, center.y + (maxDim / 3), center.z + cameraZ);
                 camera.updateProjectionMatrix();
                 controls.update();
 
@@ -150,12 +154,11 @@ export function initViewer(containerId, config) {
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // 10. Animation Loop (Makes the fog roll!)
+    // 10. Animation Loop 
     function animate() {
         requestAnimationFrame(animate);
         controls.update();
         
-        // Slowly rotate the entire fog cloud system so it drifts across the monument
         if (movingFog) {
             movingFog.rotation.y += 0.001;
         }
