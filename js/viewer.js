@@ -21,11 +21,11 @@ export function initViewer(containerId, phaseConfig) {
     // Scene
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x87CEEB);
-    scene.fog = new THREE.Fog(0x87CEEB, 30, 60);
+    scene.fog = new THREE.Fog(0x87CEEB, 20, 40);
     
-    // Camera
+    // Camera - CLOSER
     camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(phaseConfig.cameraX || 8, phaseConfig.cameraY || 6, phaseConfig.cameraZ || 12);
+    camera.position.set(phaseConfig.cameraX || 5, phaseConfig.cameraY || 4, phaseConfig.cameraZ || 8);
     
     // Renderer
     renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -40,37 +40,37 @@ export function initViewer(containerId, phaseConfig) {
     controls.enablePan = true;
     controls.target.set(0, 1, 0);
     
-    // Lights - BRIGHT enough
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    // BRIGHT LIGHTS
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.9);
     scene.add(ambientLight);
     
-    const mainLight = new THREE.DirectionalLight(0xfff5e6, 1.2);
+    const mainLight = new THREE.DirectionalLight(0xfff5e6, 1.5);
     mainLight.position.set(5, 10, 7);
     mainLight.castShadow = true;
     scene.add(mainLight);
     
-    const fillLight = new THREE.PointLight(0x88aaff, 0.4);
-    fillLight.position.set(-3, 5, 4);
+    const frontLight = new THREE.DirectionalLight(0xffaa88, 0.6);
+    frontLight.position.set(0, 2, 5);
+    scene.add(frontLight);
+    
+    const fillLight = new THREE.PointLight(0x88aaff, 0.5);
+    fillLight.position.set(0, -1, 0);
     scene.add(fillLight);
     
-    const backLight = new THREE.PointLight(0xffaa66, 0.3);
-    backLight.position.set(0, 3, -6);
-    scene.add(backLight);
+    const rimLight = new THREE.PointLight(0xffaa66, 0.4);
+    rimLight.position.set(0, 3, -5);
+    scene.add(rimLight);
     
-    const groundLight = new THREE.PointLight(0x88aacc, 0.2);
-    groundLight.position.set(0, -2, 0);
-    scene.add(groundLight);
-    
-    // Ground
-    const groundMat = new THREE.MeshStandardMaterial({ color: 0x5a8a3a, roughness: 0.9 });
-    const ground = new THREE.Mesh(new THREE.CircleGeometry(20, 32), groundMat);
+    // Ground - LIGHTER COLOR
+    const groundMat = new THREE.MeshStandardMaterial({ color: 0x7a9a5a, roughness: 0.8 });
+    const ground = new THREE.Mesh(new THREE.CircleGeometry(15, 32), groundMat);
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = -0.5;
     ground.receiveShadow = true;
     scene.add(ground);
     
-    // Grid helper
-    const gridHelper = new THREE.GridHelper(30, 20, 0x88aacc, 0x446688);
+    // Simple grid
+    const gridHelper = new THREE.GridHelper(25, 20, 0x88aacc, 0x558866);
     gridHelper.position.y = -0.45;
     scene.add(gridHelper);
     
@@ -83,8 +83,8 @@ export function initViewer(containerId, phaseConfig) {
             (gltf) => {
                 if (currentModel) scene.remove(currentModel);
                 currentModel = gltf.scene;
-                currentModel.position.y = -0.3;
-                currentModel.scale.set(0.8, 0.8, 0.8);
+                currentModel.position.y = -0.2;
+                currentModel.scale.set(0.6, 0.6, 0.6);
                 currentModel.traverse((child) => {
                     if (child.isMesh) {
                         child.castShadow = true;
@@ -111,7 +111,6 @@ export function initViewer(containerId, phaseConfig) {
     }
     animate();
     
-    // Resize handler
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
