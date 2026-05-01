@@ -1,3 +1,4 @@
+// js/viewer.js
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -10,7 +11,7 @@ export async function initViewer(containerId, phaseConfig) {
     const container = document.getElementById(containerId);
     const phaseIndex = phaseConfig.phaseIndex;
 
-    // ✅ SIMPLE PATH (NO basePath headaches)
+    // ✅ SIMPLE + RELIABLE PATHS
     const phaseFiles = {
         0: '/models/Phase1.glb',
         1: '/models/Phase2.glb',
@@ -19,7 +20,7 @@ export async function initViewer(containerId, phaseConfig) {
         4: '/models/Phase5.glb'
     };
 
-    console.log("📦 Loading:", phaseFiles[phaseIndex]);
+    console.log("📦 Loading model:", phaseFiles[phaseIndex]);
 
     // ===== SCENE =====
     const scene = new THREE.Scene();
@@ -49,50 +50,70 @@ export async function initViewer(containerId, phaseConfig) {
     // ===== LOADING UI =====
     const loading = document.getElementById('loading');
 
-    // ===== LOADER =====
+    // ===== GLTF LOADER =====
     const loader = new GLTFLoader();
 
-    // DRACO
+    // ✅ DRACO SUPPORT
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
     loader.setDRACOLoader(dracoLoader);
 
-    // 🔥 CRITICAL: Meshopt (async CDN)
-    const { MeshoptDecoder } = await import(
+    // ✅ MESHOPT (FULLY INITIALIZED - FIXES INFINITE LOADING)
+    const meshoptModule = await import(
         'https://unpkg.com/meshopt_decoder@0.18.1/meshopt_decoder.module.js'
     );
-    loader.setMeshoptDecoder(MeshoptDecoder);
+
+    await meshoptModule.default.ready;
+
+    loader.setMeshoptDecoder(meshoptModule.default);
+
+    console.log("✅ Decoders ready");
 
     // ===== LOAD MODEL =====
     loader.load(
         phaseFiles[phaseIndex],
 
+        // SUCCESS
         (gltf) => {
-            console.log("✅ MODEL LOADED");
+            console.log("✅ MODEL LOADED SUCCESSFULLY");
 
             if (currentModel) scene.remove(currentModel);
 
             currentModel = gltf.scene;
             currentModel.scale.set(0.8, 0.8, 0.8);
+            currentModel.position.y = -0.4;
+
+            currentModel.traverse((child) => {
+                if (child.isMesh) {
+                    child.castShadow = true;
+                    child.receiveShadow = true;
+                }
+            });
 
             scene.add(currentModel);
 
             if (loading) loading.style.display = 'none';
         },
 
+        // PROGRESS
         (xhr) => {
             if (xhr.total) {
-                console.log(`⏳ ${(xhr.loaded / xhr.total * 100).toFixed(0)}%`);
+                const percent = (xhr.loaded / xhr.total) * 100;
+                console.log(`⏳ ${percent.toFixed(0)}% loaded`);
             }
         },
 
+        // ERROR
         (error) => {
-            console.error("❌ LOAD ERROR:", error);
-            if (loading) loading.innerHTML = "❌ Failed to load model";
+            console.error("❌ MODEL LOAD ERROR:", error);
+
+            if (loading) {
+                loading.innerHTML = "❌ Failed to load 3D model";
+            }
         }
     );
 
-    // ===== LOOP =====
+    // ===== ANIMATION LOOP =====
     function animate() {
         requestAnimationFrame(animate);
         controls.update();
