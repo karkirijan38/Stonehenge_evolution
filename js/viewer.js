@@ -15,13 +15,14 @@ export function initViewer(containerId, config) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    // 1. Scene & Background (Muted English Sky)
+    // 1. Scene & Background
     const scene = new THREE.Scene();
     const skyColor = 0x9BB0B5; 
     scene.background = new THREE.Color(skyColor); 
 
-    // 2. Distance Fog
-    scene.fog = new THREE.Fog(skyColor, 20, 150); // Pushed fog back slightly so it doesn't crop the model
+    // 2. 👑 INFINITE HORIZON FOG 👑
+    // Pushed the fog way back so it creates a massive, seamless fade into the sky
+    scene.fog = new THREE.Fog(skyColor, 40, 600); 
 
     // 3. Camera & Renderer
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
@@ -36,10 +37,11 @@ export function initViewer(containerId, config) {
     sunLight.position.set(50, 80, 40);
     scene.add(sunLight);
 
-    // 5. Procedural Grass Floor 
-    const floorGeometry = new THREE.PlaneGeometry(300, 300);
+    // 5. 👑 MASSIVE PROCEDURAL GRASS FLOOR 👑
+    // Made it 2000x2000 so the camera never sees the edge!
+    const floorGeometry = new THREE.PlaneGeometry(2000, 2000);
     const floorMaterial = new THREE.MeshStandardMaterial({ 
-        color: 0x7c855e, 
+        color: 0x7a9c59, // Tweaked the green to better match your screenshot!
         roughness: 0.95,
         metalness: 0.05
     });
@@ -60,20 +62,20 @@ export function initViewer(containerId, config) {
     const fogTexture = new THREE.CanvasTexture(fogCanvas);
 
     const fogGeometry = new THREE.BufferGeometry();
-    const fogCount = 60; 
+    const fogCount = 80; 
     const fogPositions = new Float32Array(fogCount * 3);
     for(let i = 0; i < fogCount; i++) {
-        fogPositions[i*3] = (Math.random() - 0.5) * 120;     
+        fogPositions[i*3] = (Math.random() - 0.5) * 200;     
         fogPositions[i*3+1] = Math.random() * 8 + 1;         
-        fogPositions[i*3+2] = (Math.random() - 0.5) * 120;     
+        fogPositions[i*3+2] = (Math.random() - 0.5) * 200;     
     }
     fogGeometry.setAttribute('position', new THREE.BufferAttribute(fogPositions, 3));
     
     const fogMaterial = new THREE.PointsMaterial({
-        size: 40, 
+        size: 50, 
         map: fogTexture,
         transparent: true,
-        opacity: 0.6,
+        opacity: 0.5,
         depthWrite: false, 
         blending: THREE.NormalBlending,
         color: 0xcad6d9 
@@ -98,18 +100,16 @@ export function initViewer(containerId, config) {
             (gltf) => {
                 const model = gltf.scene;
 
-                // --- 👑 UPGRADED TILT FIXER ---
-                // Now Phase 4 and Phase 5 have their own separate tilt controls!
+                // --- TILT FIXER ---
                 if (config.phaseIndex === 3) {
-                    model.rotation.z = 25 * (Math.PI / 180); // Phase 4 tilt
+                    model.rotation.z = 25 * (Math.PI / 180); 
                 } else if (config.phaseIndex === 4) {
-                    model.rotation.z = 0 * (Math.PI / 180); // Phase 5 tilt (Set to 0 so the new model is flat)
-                    // If Phase 5 tilts the OTHER way, try 25 or -25 here!
+                    model.rotation.z = 0 * (Math.PI / 180); 
                 }
 
                 scene.add(model);
 
-                // --- 👑 UPGRADED AUTO-FRAME (Anti-Crop) ---
+                // --- AUTO-FRAME ---
                 const box = new THREE.Box3().setFromObject(model);
                 const center = box.getCenter(new THREE.Vector3());
                 const size = box.getSize(new THREE.Vector3());
@@ -119,10 +119,8 @@ export function initViewer(containerId, config) {
                 const maxDim = Math.max(size.x, size.y, size.z);
                 const fov = camera.fov * (Math.PI / 180);
                 
-                // Bumped multiplier from 1.5 to 2.2 to pull the camera further back!
                 let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2)) * 2.2; 
 
-                // Bumped the Y multiplier to look slightly more downward
                 camera.position.set(center.x, center.y + (maxDim / 3), center.z + cameraZ);
                 camera.updateProjectionMatrix();
                 controls.update();
