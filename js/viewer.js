@@ -1,34 +1,37 @@
 // js/viewer.js
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// ===== LOCAL GLB FILES =====
+// ===== PATH FIX (GitHub Pages aware) =====
+const basePath = window.location.hostname.includes('github.io')
+    ? '/Stonehenge_evolution/'
+    : './';
+
 const phaseFiles = {
-    0: '/Stonehenge_evolution/models/Phase1.glb',
-    1: '/Stonehenge_evolution/models/Phase2.glb',
-    2: '/Stonehenge_evolution/models/Phase3.glb',
-    3: '/Stonehenge_evolution/models/Phase4.glb',
-    4: '/Stonehenge_evolution/models/Phase5.glb'
+    0: basePath + 'models/Phase1.glb',
+    1: basePath + 'models/Phase2.glb',
+    2: basePath + 'models/Phase3.glb',
+    3: basePath + 'models/Phase4.glb',
+    4: basePath + 'models/Phase5.glb'
 };
 
 let currentModel = null;
-let scene, camera, renderer, controls;
-let voiceEnabled = true;
-let currentPhaseIndex = 0;
 
 export function initViewer(containerId, phaseConfig) {
     const container = document.getElementById(containerId);
-    currentPhaseIndex = phaseConfig.phaseIndex;
+    const phaseIndex = phaseConfig.phaseIndex;
+
+    console.log("📦 Loading phase:", phaseIndex);
+    console.log("📁 Model path:", phaseFiles[phaseIndex]);
 
     // ===== SCENE =====
-    scene = new THREE.Scene();
+    const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x87CEEB);
     scene.fog = new THREE.Fog(0x87CEEB, 30, 60);
 
     // ===== CAMERA =====
-    camera = new THREE.PerspectiveCamera(
+    const camera = new THREE.PerspectiveCamera(
         45,
         window.innerWidth / window.innerHeight,
         0.1,
@@ -41,29 +44,21 @@ export function initViewer(containerId, phaseConfig) {
     );
 
     // ===== RENDERER =====
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.shadowMap.enabled = true;
-    renderer.xr.enabled = true;
     container.appendChild(renderer.domElement);
 
-    // ===== VR BUTTON =====
-    const vrBtn = VRButton.createButton(renderer);
-    vrBtn.style.position = 'absolute';
-    vrBtn.style.top = '20px';
-    vrBtn.style.left = '20px';
-    document.body.appendChild(vrBtn);
-
     // ===== CONTROLS =====
-    controls = new OrbitControls(camera, renderer.domElement);
+    const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.target.set(0, 2, 0);
 
     // ===== LIGHTING =====
-    scene.add(new THREE.AmbientLight(0x404060, 0.6));
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
 
-    const sun = new THREE.DirectionalLight(0xfff5e6, 1.2);
-    sun.position.set(10, 20, 5);
+    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+    sun.position.set(10, 20, 10);
     sun.castShadow = true;
     scene.add(sun);
 
@@ -77,20 +72,20 @@ export function initViewer(containerId, phaseConfig) {
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // ===== LOADING TEXT =====
+    // ===== LOADING UI =====
     const loading = document.getElementById('loading');
 
-    // ===== MODEL LOADER =====
+    // ===== LOADER =====
     const loader = new GLTFLoader();
-    const modelPath = phaseFiles[currentPhaseIndex];
-
-    console.log("Loading:", modelPath);
+    loader.setCrossOrigin('anonymous');
 
     loader.load(
-        modelPath,
+        phaseFiles[phaseIndex],
 
         // ✅ SUCCESS
         (gltf) => {
+            console.log("✅ Model loaded successfully");
+
             if (currentModel) scene.remove(currentModel);
 
             currentModel = gltf.scene;
@@ -106,8 +101,6 @@ export function initViewer(containerId, phaseConfig) {
 
             scene.add(currentModel);
 
-            console.log("✅ Model loaded");
-
             if (loading) loading.style.display = 'none';
         },
 
@@ -115,16 +108,16 @@ export function initViewer(containerId, phaseConfig) {
         (xhr) => {
             if (xhr.total) {
                 const percent = (xhr.loaded / xhr.total) * 100;
-                console.log(percent.toFixed(0) + "% loaded");
+                console.log(`⏳ ${percent.toFixed(0)}% loaded`);
             }
         },
 
         // ❌ ERROR
         (error) => {
-            console.error("❌ GLB LOAD ERROR:", error);
+            console.error("❌ MODEL LOAD FAILED:", error);
 
             if (loading) {
-                loading.innerHTML = "❌ Failed to load model";
+                loading.innerHTML = "❌ Failed to load 3D model";
             }
         }
     );
@@ -144,5 +137,5 @@ export function initViewer(containerId, phaseConfig) {
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    return { scene, camera };
+    return { scene, camera, controls };
 }
