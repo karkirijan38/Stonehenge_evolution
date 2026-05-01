@@ -2,14 +2,15 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// ===== DIRECT GITHUB PAGES LINKS =====
+// ===== LOCAL LINKS (NOT URLs) =====
 const phaseFiles = {
-    0: 'https://karkirijan38.github.io/Stonehenge-evolution/phase1.glb',
-    1: 'https://karkirijan38.github.io/Stonehenge-evolution/phase2.glb',
-    2: 'https://karkirijan38.github.io/Stonehenge-evolution/phase3.glb',
-    3: 'https://karkirijan38.github.io/Stonehenge-evolution/phase4.glb',
-    4: 'https://karkirijan38.github.io/Stonehenge-evolution/phase5.glb'
+    0: './phase1.glb',
+    1: './phase2.glb',
+    2: './phase3.glb',
+    3: './phase4.glb',
+    4: './phase5.glb'
 };
+
 
 export function initViewer(containerId, config) {
     const container = document.getElementById(containerId);
@@ -20,38 +21,38 @@ export function initViewer(containerId, config) {
 
     // 1. Scene Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB); // Sky blue
+    scene.background = new THREE.Color(0x87CEEB); // Beautiful sky blue
 
     // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    // Move the camera relatively close
+    // Move the camera close to the center
     camera.position.set(config.cameraX || 0, config.cameraY || 5, config.cameraZ || 15);
 
     // 3. Renderer Setup
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Saves battery on mobile
     container.appendChild(renderer.domElement);
 
     // 4. Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfff5e6, 2.5);
+    const sunLight = new THREE.DirectionalLight(0xfff5e6, 2.5); // Warm sunlight
     sunLight.position.set(10, 20, 10);
     scene.add(sunLight);
 
-    // 5. Procedural Grass Floor
-    const floorGeometry = new THREE.PlaneGeometry(300, 300); // Made the floor bigger
+    // 5. Procedural Grass Floor (Hides the square dirt base)
+    const floorGeometry = new THREE.PlaneGeometry(300, 300);
     const floorMaterial = new THREE.MeshStandardMaterial({ 
         color: 0x5a8a3a, 
         roughness: 0.9 
     });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = -Math.PI / 2;
+    floor.rotation.x = -Math.PI / 2; // Lay it flat
     scene.add(floor);
 
-    // 6. Controls
+    // 6. Controls (Touch-friendly)
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
@@ -67,17 +68,29 @@ export function initViewer(containerId, config) {
             (gltf) => {
                 const model = gltf.scene;
 
-                // --- BRUTE FORCE SCALE & POSITION ---
-                // If it's still too small, change 30 to 50, 100, or 200!
-                // If it's way too huge now, drop it to 10 or 5.
-                model.scale.set(30, 30, 30);
+                // --- KING'S LOCK-ON & SCALE FIX ---
+                // 1. Find the exact center of the AI model
+                const box = new THREE.Box3().setFromObject(model);
+                const center = box.getCenter(new THREE.Vector3());
                 
-                // Center it at (0,0) and sink it down by -2 to hide the dirt box under the grass
-                model.position.set(0, -2, 0);
-                // ------------------------------------
+                // 2. Shift the model so its exact center is at 0,0,0
+                model.position.x = -center.x;
+                model.position.z = -center.z;
+                
+                // Sink the bottom edge slightly into the grass to hide the dirt block
+                model.position.y = -box.min.y - 0.5; 
 
-                scene.add(model);
-                console.log(`Phase ${config.phaseIndex + 1} loaded with Brute Force Scale!`);
+                // 3. Create an invisible "Anchor" box at the center of the world
+                const group = new THREE.Group();
+                group.add(model); // Put the centered model inside the anchor
+
+                // 4. NOW SCALE THE ANCHOR! (It will blow up in place, without flying away)
+                // Change these numbers to 15, 20, or 30 to get the perfect size!
+                group.scale.set(15, 15, 15); 
+                
+                scene.add(group);
+                console.log(`Phase ${config.phaseIndex + 1} locked in and scaled!`);
+                // ----------------------------------
             }, 
             (xhr) => {
                 console.log(`Loading: ${Math.round((xhr.loaded / xhr.total) * 100)}%`);
