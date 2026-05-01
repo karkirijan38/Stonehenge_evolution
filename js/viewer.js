@@ -19,27 +19,22 @@ export function initViewer(containerId, config) {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x87CEEB); 
 
-    // 2. Camera Setup (We will auto-move this later)
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 5000);
 
-    // 3. Renderer
     const renderer = new THREE.WebGLRenderer({ antialias: true, logarithmicDepthBuffer: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    // 4. Lighting
     scene.add(new THREE.AmbientLight(0xffffff, 1.5));
     const sunLight = new THREE.DirectionalLight(0xfff5e6, 2.5);
     sunLight.position.set(50, 100, 50);
     scene.add(sunLight);
 
-    // 5. Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
 
-    // 6. Load the 3D Model
     const loader = new GLTFLoader();
     const modelUrl = phaseFiles[config.phaseIndex];
 
@@ -48,32 +43,51 @@ export function initViewer(containerId, config) {
             modelUrl, 
             (gltf) => {
                 const model = gltf.scene;
+
+                // --- 👑 THE TILT FIXER (For Phases 4 & 5) ---
+                // config.phaseIndex 3 is Phase 4, config.phaseIndex 4 is Phase 5
+                if (config.phaseIndex === 3 || config.phaseIndex === 4) {
+                    
+                    // Change these numbers to level out your model! 
+                    // Positive Z tilts it Left. Negative Z tilts it Right.
+                    const tiltForwardBack = 0; // X axis
+                    const tiltLeftRight = 25;  // Z axis (I guessed 25 degrees left to fix your right-tilt)
+                    
+                    model.rotation.x = tiltForwardBack * (Math.PI / 180);
+                    model.rotation.z = tiltLeftRight * (Math.PI / 180);
+                }
+                // --------------------------------------------
+
                 scene.add(model);
 
                 // --- THE MAGIC AUTO-FRAME ---
-                // 1. Measure the exact boundaries of the AI model
                 const box = new THREE.Box3().setFromObject(model);
                 const center = box.getCenter(new THREE.Vector3());
                 const size = box.getSize(new THREE.Vector3());
 
-                // 2. Force the controls to lock dead-center onto the model
                 controls.target.copy(center);
 
-                // 3. Calculate exactly how far back the camera needs to be
                 const maxDim = Math.max(size.x, size.y, size.z);
                 const fov = camera.fov * (Math.PI / 180);
-                let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2));
-                
-                // Multiply by 1.5 to leave a nice border around it on the screen
-                cameraZ *= 1.5; 
+                let cameraZ = Math.abs(maxDim / 2 / Math.tan(fov / 2)) * 1.5; 
 
-                // 4. Move the camera to the perfect viewing angle
                 camera.position.set(center.x, center.y + (maxDim / 4), center.z + cameraZ);
                 
-                // 5. Update everything so it doesn't glitch!
                 camera.updateProjectionMatrix();
                 controls.update();
-                // -----------------------------
+
+                // --- 🛑 NUKE THE LOADING TEXT ---
+                // This searches your HTML for anything acting like a loading screen and hides it!
+                const loadingScreens = [
+                    document.getElementById('loading'),
+                    document.getElementById('status'),
+                    document.getElementById('loading-screen'),
+                    document.querySelector('.loading')
+                ];
+                loadingScreens.forEach(el => {
+                    if (el) el.style.display = 'none';
+                });
+                // --------------------------------
 
             }, 
             (xhr) => {
@@ -85,14 +99,12 @@ export function initViewer(containerId, config) {
         );
     }
 
-    // 7. Resize Handler
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    // 8. Animation Loop
     function animate() {
         requestAnimationFrame(animate);
         controls.update();
