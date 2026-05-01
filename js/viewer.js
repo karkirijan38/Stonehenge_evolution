@@ -4,13 +4,13 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { VRButton } from 'three/addons/webxr/VRButton.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
-// ===== DROPBOX GLB LINKS =====
+// ===== LOCAL GITHUB GLB LINKS =====
 const phaseFiles = {
-    0: 'https://www.dropbox.com/scl/fi/q8s8lhf81nn618ujoviid/Phase1.glb?rlkey=8d240dkwdz9o9hit9uz8q4j1p&st=ufoiod8c&dl=1',
-    1: 'https://www.dropbox.com/scl/fi/gug753zotsb7oh2n3vnc1/Phase2.glb?rlkey=now6b4bralgqpas089hlyiv9b&st=4egueher&dl=1',
-    2: 'https://www.dropbox.com/scl/fi/2im3qmfb5uxxx685vyfk4/Phase3.glb?rlkey=hg851yj9iqpvkdmrwhnj7yn2f&st=mei36a4q&dl=1',
-    3: 'https://www.dropbox.com/scl/fi/u87bj7vy1chumsdgtcyqu/Phase4.glb?rlkey=4hfk1uaiyr0yus47fqmsw0q8u&st=ylfzysz6&dl=1',
-    4: 'https://www.dropbox.com/scl/fi/xl0oi1tup8g3ludzoucma/Phase5.glb?rlkey=3nkx3khxx50fa04xms4rm3k3u&st=ad79iiq2&dl=1'
+    0: 'Phase1.glb',
+    1: 'Phase2.glb',
+    2: 'Phase3.glb',
+    3: 'Phase4.glb',
+    4: 'Phase5.glb'
 };
 
 let currentModel = null;
