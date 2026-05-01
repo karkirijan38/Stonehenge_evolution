@@ -6,11 +6,11 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // ===== LOCAL GLB FILES =====
 const phaseFiles = {
-    0: './models/Phase1.glb',
-    1: './models/Phase2.glb',
-    2: './models/Phase3.glb',
-    3: './models/Phase4.glb',
-    4: './models/Phase5.glb'
+    0: '/Stonehenge-evolution/models/Phase1.glb',
+    1: '/Stonehenge-evolution/models/Phase2.glb',
+    2: '/Stonehenge-evolution/models/Phase3.glb',
+    3: '/Stonehenge-evolution/models/Phase4.glb',
+    4: '/Stonehenge-evolution/models/Phase5.glb'
 };
 
 let currentModel = null;
