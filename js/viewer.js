@@ -2,12 +2,15 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
 
-// ===== PATH FIX (GitHub Pages aware) =====
+// ===== BASE PATH (GitHub Pages safe) =====
 const basePath = window.location.hostname.includes('github.io')
     ? '/Stonehenge_evolution/'
     : './';
 
+// ===== MODEL PATHS =====
 const phaseFiles = {
     0: basePath + 'models/Phase1.glb',
     1: basePath + 'models/Phase2.glb',
@@ -22,8 +25,8 @@ export function initViewer(containerId, phaseConfig) {
     const container = document.getElementById(containerId);
     const phaseIndex = phaseConfig.phaseIndex;
 
-    console.log("📦 Loading phase:", phaseIndex);
-    console.log("📁 Model path:", phaseFiles[phaseIndex]);
+    console.log("📦 Phase:", phaseIndex);
+    console.log("📁 Path:", phaseFiles[phaseIndex]);
 
     // ===== SCENE =====
     const scene = new THREE.Scene();
@@ -75,16 +78,25 @@ export function initViewer(containerId, phaseConfig) {
     // ===== LOADING UI =====
     const loading = document.getElementById('loading');
 
-    // ===== LOADER =====
+    // ===== GLTF LOADER =====
     const loader = new GLTFLoader();
     loader.setCrossOrigin('anonymous');
 
+    // ✅ DRACO SUPPORT
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+    loader.setDRACOLoader(dracoLoader);
+
+    // ✅ MESHOPT SUPPORT (CRITICAL)
+    loader.setMeshoptDecoder(MeshoptDecoder);
+
+    // ===== LOAD MODEL =====
     loader.load(
         phaseFiles[phaseIndex],
 
         // ✅ SUCCESS
         (gltf) => {
-            console.log("✅ Model loaded successfully");
+            console.log("✅ Model loaded");
 
             if (currentModel) scene.remove(currentModel);
 
@@ -110,6 +122,35 @@ export function initViewer(containerId, phaseConfig) {
                 const percent = (xhr.loaded / xhr.total) * 100;
                 console.log(`⏳ ${percent.toFixed(0)}% loaded`);
             }
+        },
+
+        // ❌ ERROR
+        (error) => {
+            console.error("❌ LOAD FAILED:", error);
+
+            if (loading) {
+                loading.innerHTML = "❌ Failed to load 3D model";
+            }
+        }
+    );
+
+    // ===== ANIMATION =====
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    // ===== RESIZE =====
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+
+    return { scene, camera, controls };
+}            }
         },
 
         // ❌ ERROR
