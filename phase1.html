@@ -35,13 +35,16 @@
             }
         }
     </script>
-    <script type="module">
-        import { initViewer } from './js/viewer.js';
+        <script type="module">
+        import { initViewer } from './viewer.js'; // or './js/viewer.js' depending on your setup
         
         initViewer('viewer', {
             phaseIndex: 0,
-            cameraX: 12, cameraY: 8, cameraZ: 16
+            cameraX: 0,    // Center it
+            cameraY: 6,    // Eye level
+            cameraZ: 14    // Bring it way closer!
         });
     </script>
+
 </body>
 </html>
