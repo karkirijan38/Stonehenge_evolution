@@ -3,13 +3,12 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // ===== DIRECT GITHUB PAGES LINKS =====
-// This guarantees the browser finds your models without path errors
 const phaseFiles = {
-    0: 'https://karkirijan38.github.io/Stonehenge-evolution/Phase1.glb',
-    1: 'https://karkirijan38.github.io/Stonehenge-evolution/Phase2.glb',
-    2: 'https://karkirijan38.github.io/Stonehenge-evolution/Phase3.glb',
-    3: 'https://karkirijan38.github.io/Stonehenge-evolution/Phase4.glb',
-    4: 'https://karkirijan38.github.io/Stonehenge-evolution/Phase5.glb'
+    0: 'https://karkirijan38.github.io/Stonehenge-evolution/phase1.glb',
+    1: 'https://karkirijan38.github.io/Stonehenge-evolution/phase2.glb',
+    2: 'https://karkirijan38.github.io/Stonehenge-evolution/phase3.glb',
+    3: 'https://karkirijan38.github.io/Stonehenge-evolution/phase4.glb',
+    4: 'https://karkirijan38.github.io/Stonehenge-evolution/phase5.glb'
 };
 
 export function initViewer(containerId, config) {
@@ -19,43 +18,44 @@ export function initViewer(containerId, config) {
         return;
     }
 
-    // 1. Scene Setup (Sky Color)
+    // 1. Scene Setup
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87CEEB); // Beautiful sky blue
+    scene.background = new THREE.Color(0x87CEEB); // Sky blue
 
-    // 2. Camera Setup (Using the config from your HTML)
+    // 2. Camera Setup
     const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(config.cameraX || 0, config.cameraY || 6, config.cameraZ || 14);
+    // Move the camera relatively close
+    camera.position.set(config.cameraX || 0, config.cameraY || 5, config.cameraZ || 15);
 
     // 3. Renderer Setup
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Good for mobile performance
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
     // 4. Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
     scene.add(ambientLight);
 
-    const sunLight = new THREE.DirectionalLight(0xfff5e6, 2.5); // Warm sunlight
+    const sunLight = new THREE.DirectionalLight(0xfff5e6, 2.5);
     sunLight.position.set(10, 20, 10);
     scene.add(sunLight);
 
-    // 5. Procedural Grass Floor (To hide the square dirt base)
-    const floorGeometry = new THREE.PlaneGeometry(200, 200);
+    // 5. Procedural Grass Floor
+    const floorGeometry = new THREE.PlaneGeometry(300, 300); // Made the floor bigger
     const floorMaterial = new THREE.MeshStandardMaterial({ 
-        color: 0x5a8a3a, // Match your textures.js grass color
+        color: 0x5a8a3a, 
         roughness: 0.9 
     });
     const floor = new THREE.Mesh(floorGeometry, floorMaterial);
-    floor.rotation.x = -Math.PI / 2; // Lay it flat
+    floor.rotation.x = -Math.PI / 2;
     scene.add(floor);
 
-    // 6. Controls (Touch-friendly)
+    // 6. Controls
     const controls = new OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.maxPolarAngle = Math.PI / 2 - 0.05; // Stop camera from going under the grass
+    controls.maxPolarAngle = Math.PI / 2 - 0.05; // Stop camera from going underground
 
     // 7. Load the 3D Model
     const loader = new GLTFLoader();
@@ -67,47 +67,25 @@ export function initViewer(containerId, config) {
             (gltf) => {
                 const model = gltf.scene;
 
-                // --- KING'S AUTO-SCALE & CENTER ALGORITHM ---
+                // --- BRUTE FORCE SCALE & POSITION ---
+                // If it's still too small, change 30 to 50, 100, or 200!
+                // If it's way too huge now, drop it to 10 or 5.
+                model.scale.set(30, 30, 30);
                 
-                // A. Measure whatever size Tripo made the model
-                const box = new THREE.Box3().setFromObject(model);
-                const size = box.getSize(new THREE.Vector3());
-                
-                // B. Force it to be exactly 15 units wide (Nice and big!)
-                const maxDim = Math.max(size.x, size.y, size.z);
-                const scaleFactor = 15 / maxDim;
-                model.scale.set(scaleFactor, scaleFactor, scaleFactor);
-
-                // C. Re-measure the new BIG model to find its true center
-                box.setFromObject(model);
-                const center = box.getCenter(new THREE.Vector3());
-                
-                // D. Center the X and Z perfectly so the camera looks right at it
-                model.position.x = -center.x;
-                model.position.z = -center.z;
-                
-                // E. Sink the square dirt base into the procedural grass!
-                // We shift it down based on its lowest point. 
-                // Tweak the "- 0.5" if it needs to sink more or less.
-                model.position.y = -box.min.y - 0.5; 
-                
-                // ---------------------------------------------
+                // Center it at (0,0) and sink it down by -2 to hide the dirt box under the grass
+                model.position.set(0, -2, 0);
+                // ------------------------------------
 
                 scene.add(model);
-                console.log(`Phase ${config.phaseIndex + 1} successfully loaded and scaled!`);
+                console.log(`Phase ${config.phaseIndex + 1} loaded with Brute Force Scale!`);
             }, 
             (xhr) => {
-                if (xhr.lengthComputable) {
-                    console.log(`Loading: ${Math.round((xhr.loaded / xhr.total) * 100)}%`);
-                }
+                console.log(`Loading: ${Math.round((xhr.loaded / xhr.total) * 100)}%`);
             },
             (error) => {
-                console.error('CRITICAL ERROR loading model:', error);
-                alert(`Error loading model for Phase ${config.phaseIndex + 1}. Check the file name and URL!`);
+                console.error('Error loading model:', error);
             }
         );
-    } else {
-        console.error(`No model link found for phase index: ${config.phaseIndex}`);
     }
 
     // 8. Handle Window Resize
