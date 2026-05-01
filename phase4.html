@@ -36,13 +36,17 @@
             }
         }
     </script>
-    <script type="module">
-        import { initViewer } from './js/viewer.js';
+        <script type="module">
+        // 1. The "?v=6" forces your phone to download the new Auto-Frame code!
+        // Make sure this points to your js folder accurately:
+        import { initViewer } from './js/viewer.js?v=6'; 
         
+        // 2. Look how clean this is! No more manual camera numbers.
+        // The Auto-Frame handles everything automatically now.
         initViewer('viewer', {
-            phaseIndex: 3,
-            cameraX: 8, cameraY: 6, cameraZ: 12
+            phaseIndex: 2 
         });
     </script>
+
 </body>
 </html>
